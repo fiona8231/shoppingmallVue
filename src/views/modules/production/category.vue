@@ -56,12 +56,27 @@ return {
 //监听属性 类似于data概念
 computed: {},
 //监控data中的数据变化
+
+methods:{
+    getMeuns(){
+        this.$http({
+            url: this.$http.adornUrl('/production/category/list/tree'),
+            method: 'get',
+            // params: this.$http.adornParams({
+            //     'page': this.pageIndex,
+            //     'limit': this.pageSize,
+            //     'roleName': this.dataForm.roleName
+            // })
+            }).then(data=>{
+                data.log("成功获取菜单数据",data)
+            })
+    },
+},
 watch: {},
-//方法集合
 
 //生命周期 - 创建完成（可以访问当前this实例）
 created() {
-
+   this.getMeuns();
 },
 //生命周期 - 挂载完成（可以访问DOM元素）
 mounted() {

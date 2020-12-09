@@ -162,7 +162,7 @@
                 message: '操作成功',
                 type: 'success',
                 duration: 1500,
-                onClose: () => {
+                onClose: () => {``
                   this.getDataList()
                 }
               })
