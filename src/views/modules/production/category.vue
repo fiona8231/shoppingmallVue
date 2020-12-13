@@ -7,6 +7,8 @@
       show-checkbox
       node-key="catId"
       :default-expanded-keys="expandedKey"
+      draggable
+      :allow-drop="allowDrop"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -43,17 +45,26 @@
     >
       <el-form :model="category">
         <el-form-item label="分类名称">
-          <el-input v-model="category.name" autocomplete="off" @input="change($event)"></el-input>
+          <el-input
+            v-model="category.name"
+            autocomplete="off"
+            @input="change($event)"
+          ></el-input>
         </el-form-item>
-          
+
         <el-form-item label="图标">
-          <el-input v-model="category.icon" autocomplete="off" @input="change($event)"></el-input>
+          <el-input
+            v-model="category.icon"
+            autocomplete="off"
+            @input="change($event)"
+          ></el-input>
         </el-form-item>
-          
+
         <el-form-item label="计量单位">
           <el-input
             v-model="category.productUnit"
-            autocomplete="off" @input="change($event)"
+            autocomplete="off"
+            @input="change($event)"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -70,11 +81,13 @@ export default {
   components: {},
   data() {
     return {
+   
+      maxLevel: 0,
       dialogType: "",
       icon: "",
       productUnit: "",
       title: "",
-      
+
       category: {
         name: "",
         parentCid: 0,
@@ -98,9 +111,35 @@ export default {
   //监控data中的数据变化
 
   methods: {
-    change (e) {
-      this.$forceUpdate()
+    change(e) {
+      this.$forceUpdate();
     },
+
+    allowDrop(draggingNode, dropNode, type) {
+      console.log("allowDrop:", draggingNode, dropNode, type);
+      
+      this.countNodeLevel(draggingNode.data);
+      let deep = this.maxLevel - draggingNode.data.catLevel + 1;
+
+      if (type == "inner") {
+        return (deep + dropNode.level) <= 3;
+      } else {
+        return (deep + dropNode.parent.level) <= 3;
+      }
+     
+    },
+    countNodeLevel(node) {
+      //求最大深度
+      if (node.children != null && node.length > 0) {
+        for (let i = 0; i < node.children.length; i++) {
+          if (node.children[i].catLevel > this.maxLevel) {
+            this.maxLevel = node.children[i].catLevel;
+          }
+          this.countNodeLevel(node.children[i]);
+        }
+      }
+    },
+
     getMeuns() {
       this.$http({
         url: this.$http.adornUrl("/production/category/list/tree"),
@@ -130,7 +169,7 @@ export default {
       this.category.parentCid = data.data.parentCid;
       this.category.catLevel = data.data.catLevel;
       this.category.showStatus = 1;
-      this.category.sort =0;
+      this.category.sort = 0;
     },
     submitData() {
       if (this.dialogType == "add") {
